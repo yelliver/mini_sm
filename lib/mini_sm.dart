@@ -29,8 +29,8 @@ class Value<T> {
   String toString() => value.toString();
 }
 
-abstract class EWidget extends StatefulWidget {
-  const EWidget({super.key});
+abstract class MeWidget extends StatefulWidget {
+  const MeWidget({super.key});
 
   @override
   StatefulElement createElement() => _EStatefulElement(this);
@@ -65,16 +65,16 @@ class _EStatefulElement extends StatefulElement {
   void unregister(Value value) => value._states.remove(state);
 }
 
-class IWidget extends EWidget {
-  const IWidget(this.builder, {Key? key}) : super(key: key);
+class MiWidget extends MeWidget {
+  const MiWidget(this.builder, {Key? key}) : super(key: key);
 
   final WidgetBuilder builder;
 
   @override
-  State<IWidget> createState() => _IWidgetState();
+  State<MiWidget> createState() => _IWidgetState();
 }
 
-class _IWidgetState extends State<IWidget> {
+class _IWidgetState extends State<MiWidget> {
   @override
   Widget build(BuildContext context) => widget.builder(context);
 }

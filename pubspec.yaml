@@ -1,6 +1,6 @@
 name: mini_sm
 description: A mini state management
-version: 0.0.1-dev
+version: 0.0.1-dev.1
 homepage: https://github.com/yelliver/mini_sm
 
 environment:
