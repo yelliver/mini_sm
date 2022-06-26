@@ -1,0 +1,12 @@
+name: mini_sm
+description: A mini state management
+version: 0.0.1-dev
+homepage: https://github.com/yelliver/mini_sm
+
+environment:
+  sdk: '>=2.17.0 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
