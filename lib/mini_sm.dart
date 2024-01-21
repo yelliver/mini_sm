@@ -4,17 +4,19 @@ import 'dart:collection';
 
 import 'package:flutter/widgets.dart';
 
-Set<Value>? _context;
+WeakReference<Element>? _context;
 
 class Value<T> {
   Value(this._value);
 
   T _value;
 
-  final _listeners = HashSet<Element>();
+  final _listeners = HashSet<WeakReference<Element>>();
 
   T get value {
-    _context?.add(this);
+    if (_context != null) {
+      _listeners.add(_context!);
+    }
     return _value;
   }
 
@@ -24,9 +26,10 @@ class Value<T> {
   }
 
   void update() {
-    for (var listener in _listeners) {
-      if (listener is StatefulElement) {
-        listener.state.setState(() {});
+    for (final listener in _listeners) {
+      var element = listener.target;
+      if (element is StatefulElement) {
+        element.state.setState(() {});
       }
     }
   }
@@ -50,25 +53,12 @@ class _EStatefulElement extends StatefulElement {
   @override
   Widget build() {
     try {
-      _context = values;
-      _context?.forEach(unregister);
-      _context?.clear();
+      _context = WeakReference(this);
       return super.build();
     } finally {
-      _context?.forEach(register);
       _context = null;
     }
   }
-
-  @override
-  void unmount() {
-    values.forEach(unregister);
-    super.unmount();
-  }
-
-  void register(Value value) => value._listeners.add(this);
-
-  void unregister(Value value) => value._listeners.remove(this);
 }
 
 class MiWidget extends MeWidget {
