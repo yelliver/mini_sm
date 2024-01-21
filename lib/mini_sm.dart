@@ -2,79 +2,58 @@ library mini_sm;
 
 import 'package:flutter/widgets.dart';
 
-Set<Value>? _context;
-
-class Value<T> {
-  Value(this._value);
-
+class Vx<T> {
   T _value;
+  final Set<VxContext> contexts = {};
 
-  final Set<State> _states = {};
+  Vx(this._value);
 
-  T get value {
-    _context?.add(this);
+  T call(VxContext context) {
+    contexts.add(context);
+    context.values.add(this);
     return _value;
   }
 
-  set value(T value) {
-    _value = value;
-    update();
-  }
+  T get value => _value;
 
-  void update() => _states.forEach(_setState);
-
-  void _setState(State state) => state.setState(() {});
-
-  @override
-  String toString() => value.toString();
-}
-
-abstract class MeWidget extends StatefulWidget {
-  const MeWidget({super.key});
-
-  @override
-  StatefulElement createElement() => _EStatefulElement(this);
-}
-
-class _EStatefulElement extends StatefulElement {
-  _EStatefulElement(StatefulWidget widget) : super(widget);
-
-  final Set<Value> values = {};
-
-  @override
-  Widget build() {
-    try {
-      _context = values;
-      _context?.forEach(unregister);
-      _context?.clear();
-      return super.build();
-    } finally {
-      _context?.forEach(register);
-      _context = null;
+  set value(T newValue) {
+    if (newValue != _value) {
+      _value = newValue;
+      for (final context in contexts) {
+        context.markNeedsBuild();
+      }
     }
   }
 
   @override
+  String toString() => _value.toString();
+}
+
+class VxWidget extends StatelessWidget {
+  final Widget Function(VxContext context) builder;
+
+  const VxWidget(this.builder, {super.key});
+
+  @override
+  VxContext createElement() => VxContext(this);
+
+  @override
+  Widget build(BuildContext context) {
+    return builder(context as VxContext);
+  }
+}
+
+class VxContext extends StatelessElement {
+  final Set<Vx> values = {};
+
+  VxContext(super.widget);
+
+  @override
   void unmount() {
-    values.forEach(unregister);
+    for (final value in values) {
+      value.contexts.remove(this);
+    }
+    values.clear();
     super.unmount();
   }
-
-  void register(Value value) => value._states.add(state);
-
-  void unregister(Value value) => value._states.remove(state);
-}
-
-class MiWidget extends MeWidget {
-  const MiWidget(this.builder, {Key? key}) : super(key: key);
-
-  final WidgetBuilder builder;
-
-  @override
-  State<MiWidget> createState() => _IWidgetState();
-}
-
-class _IWidgetState extends State<MiWidget> {
-  @override
-  Widget build(BuildContext context) => widget.builder(context);
 }
