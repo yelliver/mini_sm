@@ -1,5 +1,7 @@
 library mini_sm;
 
+import 'dart:collection';
+
 import 'package:flutter/widgets.dart';
 
 Set<Value>? _context;
@@ -9,7 +11,7 @@ class Value<T> {
 
   T _value;
 
-  final Set<State> _states = {};
+  final _listeners = HashSet<Element>();
 
   T get value {
     _context?.add(this);
@@ -21,9 +23,13 @@ class Value<T> {
     update();
   }
 
-  void update() => _states.forEach(_setState);
-
-  void _setState(State state) => state.setState(() {});
+  void update() {
+    for (var listener in _listeners) {
+      if (listener is StatefulElement) {
+        listener.state.setState(() {});
+      }
+    }
+  }
 
   @override
   String toString() => value.toString();
@@ -60,9 +66,9 @@ class _EStatefulElement extends StatefulElement {
     super.unmount();
   }
 
-  void register(Value value) => value._states.add(state);
+  void register(Value value) => value._listeners.add(this);
 
-  void unregister(Value value) => value._states.remove(state);
+  void unregister(Value value) => value._listeners.remove(this);
 }
 
 class MiWidget extends MeWidget {
