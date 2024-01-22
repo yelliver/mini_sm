@@ -1,4 +1,5 @@
 import 'package:example/order_app.dart';
+import 'package:example/random_number_app.dart';
 import 'package:flutter/material.dart';
 
 import 'counter_app.dart';
@@ -27,6 +28,11 @@ class MyApp extends StatelessWidget {
       title: 'Counter',
       desc: 'Traditional counter example',
       widget: () => const CounterApp(),
+    ),
+    Example(
+      title: 'Random Number',
+      desc: 'Random Number example',
+      widget: () => const RandomNumberApp(),
     ),
     Example(
       title: 'Order',
