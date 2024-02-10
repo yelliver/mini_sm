@@ -36,11 +36,12 @@ class Go<T> {
   void go(VoidCallback fn) {
     fn();
     for (final elementReference in _elementReferences) {
-      var element = elementReference.target;
-      if (element is StatefulElement) {
-        element.state.setState(() {});
+      final element = elementReference.target;
+      if (element != null && element.mounted) {
+        element.markNeedsBuild();
       }
     }
+    _elementReferences.clear();
   }
 }
 
@@ -48,39 +49,19 @@ extension IterableGo on Iterable<Go> {
   void go(VoidCallback fn) => forEach((value) => value.go(() {}));
 }
 
-abstract class GoWidget extends StatefulWidget {
-  const GoWidget({super.key});
-
-  @override
-  StatefulElement createElement() => _EStatefulElement(this);
-}
-
-class _EStatefulElement extends StatefulElement {
-  _EStatefulElement(StatefulWidget widget) : super(widget);
-
-  final Set<Go> values = {};
-
-  @override
-  Widget build() {
-    try {
-      _context = WeakReference(this);
-      return super.build();
-    } finally {
-      _context = null;
-    }
-  }
-}
-
-class GoBuilder extends GoWidget {
-  const GoBuilder(this.builder, {Key? key}) : super(key: key);
+class GoBuilder extends StatelessWidget {
+  const GoBuilder(this.builder, {super.key});
 
   final WidgetBuilder builder;
 
   @override
-  State<GoBuilder> createState() => _GoState();
-}
-
-class _GoState extends State<GoBuilder> {
-  @override
-  Widget build(BuildContext context) => widget.builder(context);
+  Widget build(BuildContext context) {
+    var oldContext = _context;
+    _context = WeakReference(context as Element);
+    try {
+      return builder(context);
+    } finally {
+      _context = oldContext;
+    }
+  }
 }
