@@ -1,5 +1,6 @@
 library mini_sm;
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 WeakReference<Element>? _context;
@@ -11,19 +12,29 @@ class Go<T> {
 
   final Set<WeakReference<Element>> _elementReferences = {};
 
+  T get peek => _value;
+
   T get value {
-    if (_context != null) {
-      _elementReferences.add(_context!);
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks || _context != null,
+        'Do read `${this.runtimeType}` in a GoBuilder to provide the context during the `build` pipeline.');
+    var localContext = _context;
+    if (localContext != null) {
+      _elementReferences.add(localContext);
     }
     return _value;
   }
 
-  set value(T value) {
-    _value = value;
-    go();
+  set value(T newValue) {
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks,
+        'Do not write `${this.runtimeType}` during the `build` pipeline.');
+    if (_value != newValue) {
+      _value = newValue;
+      go(() {});
+    }
   }
 
-  void go() {
+  void go(VoidCallback fn) {
+    fn();
     for (final elementReference in _elementReferences) {
       var element = elementReference.target;
       if (element is StatefulElement) {
@@ -31,9 +42,10 @@ class Go<T> {
       }
     }
   }
+}
 
-  @override
-  String toString() => value.toString();
+extension IterableGo on Iterable<Go> {
+  void go(VoidCallback fn) => forEach((value) => value.go(() {}));
 }
 
 abstract class GoWidget extends StatefulWidget {

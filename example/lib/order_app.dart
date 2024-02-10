@@ -16,7 +16,7 @@ class MyItem {
   int price;
   Go<int> quantity = Go(1);
 
-  String get quantityTxt => quantity.toString().padLeft(2, '0');
+  String get quantityTxt => quantity.value.toString().padLeft(2, '0');
 }
 
 class MyController {
@@ -41,13 +41,11 @@ class MyController {
   }
 
   void addItem() {
-    myItems.value.add(MyItem(faker.food.dish(), random.nextInt(100)));
-    myItems.go();
+    myItems.go(() => myItems.value.add(MyItem(faker.food.dish(), random.nextInt(100))));
   }
 
   void removeItem() {
-    myItems.value.removeWhere((item) => item.check.value);
-    myItems.go();
+    myItems.go(() => myItems.value.removeWhere((item) => item.check.value));
   }
 
   void clickMasterCheckbox(bool? value) {
@@ -91,54 +89,53 @@ class OrderApp extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  GoBuilder((context) {
-                    return Checkbox(
-                      tristate: true,
-                      value: ctrl.allChecked,
-                      onChanged: ctrl.checkFields.isNotEmpty
-                          ? ctrl.clickMasterCheckbox
-                          : null,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GoBuilder((context) {
+                  return Checkbox(
+                    tristate: true,
+                    value: ctrl.allChecked,
+                    onChanged: ctrl.checkFields.isNotEmpty ? ctrl.clickMasterCheckbox : null,
+                  );
+                }),
+                ElevatedButton(
+                  onPressed: ctrl.addItem,
+                  child: const Text('Add'),
+                ),
+                Container(padding: const EdgeInsets.all(5)),
+                GoBuilder((context) {
+                  return ElevatedButton(
+                    onPressed: ctrl.anyChecked ? ctrl.removeItem : null,
+                    child: const Text('Remove'),
+                  );
+                }),
+                const Spacer(),
+                GoBuilder((context) {
+                  if (ctrl.showTotal.value) {
+                    return Text(
+                      'Total: \$${ctrl.totalPrice}',
+                      style: Theme.of(context).textTheme.headline6,
                     );
-                  }),
-                  ElevatedButton(
-                    child: const Text('Add'),
-                    onPressed: ctrl.addItem,
-                  ),
-                  Container(padding: const EdgeInsets.all(5)),
-                  GoBuilder((context) {
-                    return ElevatedButton(
-                      child: const Text('Remove'),
-                      onPressed: ctrl.anyChecked ? ctrl.removeItem : null,
-                    );
-                  }),
-                  const Spacer(),
-                  GoBuilder((context) {
-                    if (ctrl.showTotal.value) {
-                      return Text(
-                        'Total: \$${ctrl.totalPrice}',
-                        style: Theme.of(context).textTheme.headline6,
-                      );
-                    } else {
-                      return const Spacer();
-                    }
-                  }),
-                  GoBuilder((context) {
-                    return Checkbox(
-                      tristate: true,
-                      value: ctrl.showTotal.value,
-                      onChanged: ctrl.clickShowTotal,
-                    );
-                  }),
-                ]),
+                  } else {
+                    return const Spacer();
+                  }
+                }),
+                GoBuilder((context) {
+                  return Checkbox(
+                    tristate: true,
+                    value: ctrl.showTotal.value,
+                    onChanged: ctrl.clickShowTotal,
+                  );
+                }),
+              ],
+            ),
           ),
           Expanded(
             child: GoBuilder((context) {
               return ListView.builder(
                 itemCount: ctrl.myItems.value.length,
                 itemBuilder: (context, index) {
-                  var item = ctrl.myItems.value[index];
+                  var item = ctrl.myItems.peek[index];
                   return Card(
                     child: ListTile(
                       title: Text(item.name),
