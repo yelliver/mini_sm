@@ -1,33 +1,31 @@
 library mini_sm;
 
-import 'dart:collection';
-
 import 'package:flutter/widgets.dart';
 
 WeakReference<Element>? _context;
 
-class Value<T> {
-  Value(this._value);
+class Go<T> {
+  Go(this._value);
 
   T _value;
 
-  final _listeners = HashSet<WeakReference<Element>>();
+  final Set<WeakReference<Element>> _elementReferences = {};
 
   T get value {
     if (_context != null) {
-      _listeners.add(_context!);
+      _elementReferences.add(_context!);
     }
     return _value;
   }
 
   set value(T value) {
     _value = value;
-    update();
+    go();
   }
 
-  void update() {
-    for (final listener in _listeners) {
-      var element = listener.target;
+  void go() {
+    for (final elementReference in _elementReferences) {
+      var element = elementReference.target;
       if (element is StatefulElement) {
         element.state.setState(() {});
       }
@@ -38,8 +36,8 @@ class Value<T> {
   String toString() => value.toString();
 }
 
-abstract class MeWidget extends StatefulWidget {
-  const MeWidget({super.key});
+abstract class GoWidget extends StatefulWidget {
+  const GoWidget({super.key});
 
   @override
   StatefulElement createElement() => _EStatefulElement(this);
@@ -48,7 +46,7 @@ abstract class MeWidget extends StatefulWidget {
 class _EStatefulElement extends StatefulElement {
   _EStatefulElement(StatefulWidget widget) : super(widget);
 
-  final Set<Value> values = {};
+  final Set<Go> values = {};
 
   @override
   Widget build() {
@@ -61,16 +59,16 @@ class _EStatefulElement extends StatefulElement {
   }
 }
 
-class MiWidget extends MeWidget {
-  const MiWidget(this.builder, {Key? key}) : super(key: key);
+class GoBuilder extends GoWidget {
+  const GoBuilder(this.builder, {Key? key}) : super(key: key);
 
   final WidgetBuilder builder;
 
   @override
-  State<MiWidget> createState() => _IWidgetState();
+  State<GoBuilder> createState() => _GoState();
 }
 
-class _IWidgetState extends State<MiWidget> {
+class _GoState extends State<GoBuilder> {
   @override
   Widget build(BuildContext context) => widget.builder(context);
 }

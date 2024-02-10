@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mini_sm/mini_sm.dart';
 
 class DataModel {
-  final counter = Value(0);
+  final counter = Go(0);
 
   void incrementCounter() {
     counter.value++;
@@ -28,7 +28,7 @@ class CounterApp extends StatelessWidget {
             const Text(
               'You have pushed the button this many times:',
             ),
-            MiWidget((context) {
+            GoBuilder((context) {
               return Text(
                 '${model.counter.value}',
                 style: Theme.of(context).textTheme.headlineMedium,

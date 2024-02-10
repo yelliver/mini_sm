@@ -11,21 +11,21 @@ final random = Random();
 class MyItem {
   MyItem(this.name, this.price);
 
-  Value<bool> check = Value(false);
+  Go<bool> check = Go(false);
   String name;
   int price;
-  Value<int> quantity = Value(1);
+  Go<int> quantity = Go(1);
 
   String get quantityTxt => quantity.toString().padLeft(2, '0');
 }
 
 class MyController {
-  final myItems = Value(<MyItem>[]);
-  final showTotal = Value(true);
+  final myItems = Go(<MyItem>[]);
+  final showTotal = Go(true);
 
-  Iterable<Value> get checkFields => myItems.value.map((e) => e.check);
+  Iterable<Go> get checkFields => myItems.value.map((e) => e.check);
 
-  Iterable<Value> get quantityFields => myItems.value.map((e) => e.quantity);
+  Iterable<Go> get quantityFields => myItems.value.map((e) => e.quantity);
 
   bool? get allChecked {
     var num = myItems.value.map((item) => item.check.value ? 1 : 0).sum;
@@ -42,12 +42,12 @@ class MyController {
 
   void addItem() {
     myItems.value.add(MyItem(faker.food.dish(), random.nextInt(100)));
-    myItems.update();
+    myItems.go();
   }
 
   void removeItem() {
     myItems.value.removeWhere((item) => item.check.value);
-    myItems.update();
+    myItems.go();
   }
 
   void clickMasterCheckbox(bool? value) {
@@ -93,7 +93,7 @@ class OrderApp extends StatelessWidget {
             child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  MiWidget((context) {
+                  GoBuilder((context) {
                     return Checkbox(
                       tristate: true,
                       value: ctrl.allChecked,
@@ -107,14 +107,14 @@ class OrderApp extends StatelessWidget {
                     onPressed: ctrl.addItem,
                   ),
                   Container(padding: const EdgeInsets.all(5)),
-                  MiWidget((context) {
+                  GoBuilder((context) {
                     return ElevatedButton(
                       child: const Text('Remove'),
                       onPressed: ctrl.anyChecked ? ctrl.removeItem : null,
                     );
                   }),
                   const Spacer(),
-                  MiWidget((context) {
+                  GoBuilder((context) {
                     if (ctrl.showTotal.value) {
                       return Text(
                         'Total: \$${ctrl.totalPrice}',
@@ -124,7 +124,7 @@ class OrderApp extends StatelessWidget {
                       return const Spacer();
                     }
                   }),
-                  MiWidget((context) {
+                  GoBuilder((context) {
                     return Checkbox(
                       tristate: true,
                       value: ctrl.showTotal.value,
@@ -134,7 +134,7 @@ class OrderApp extends StatelessWidget {
                 ]),
           ),
           Expanded(
-            child: MiWidget((context) {
+            child: GoBuilder((context) {
               return ListView.builder(
                 itemCount: ctrl.myItems.value.length,
                 itemBuilder: (context, index) {
@@ -143,7 +143,7 @@ class OrderApp extends StatelessWidget {
                     child: ListTile(
                       title: Text(item.name),
                       subtitle: Text('\$${item.price}'),
-                      leading: MiWidget((context) {
+                      leading: GoBuilder((context) {
                         return Checkbox(
                           value: item.check.value,
                           onChanged: (bool? value) => ctrl.clickCheckbox(item),
@@ -157,7 +157,7 @@ class OrderApp extends StatelessWidget {
                             splashRadius: 15,
                             onPressed: () => ctrl.dcrQuantity(item),
                           ),
-                          MiWidget((context) => Text(item.quantityTxt)),
+                          GoBuilder((context) => Text(item.quantityTxt)),
                           IconButton(
                             icon: const Icon(Icons.add),
                             splashRadius: 15,

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:mini_sm/mini_sm.dart';
 
 class DataModel {
-  final randomNumber = Value(Random().nextInt(9999));
+  final randomNumber = Go(Random().nextInt(9999));
 
   void generate() {
     randomNumber.value = Random().nextInt(9999);
@@ -27,7 +27,7 @@ class RandomNumberApp extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            MiWidget((context) {
+            GoBuilder((context) {
               return Text(model.randomNumber.value.toString());
             }),
             ElevatedButton(
